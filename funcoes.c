@@ -18,7 +18,7 @@ void ordenarPontos(Ponto pontos[], int n) {
 }
 
 double calcularDistanciaTotal(Ponto pontos[], int n) {
-    double soma = 0.0;
+    double soma = 0;
     for (int i = 0; i < n - 1; i++) {
         double dx = pontos[i + 1].x - pontos[i].x;
         double dy = pontos[i + 1].y - pontos[i].y;
