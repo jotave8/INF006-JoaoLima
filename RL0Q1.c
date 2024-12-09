@@ -65,7 +65,6 @@ void processarEntrada(FILE *fp_in, FILE *fp_out) {
 
 FILE* abrirArquivoEntrada(char *nomeArquivo) {
     FILE *fp = fopen(nomeArquivo, "r");
-
     if (fp == NULL) {
         char cwd[1024];
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -76,13 +75,11 @@ FILE* abrirArquivoEntrada(char *nomeArquivo) {
         }
         return NULL;
     }
-
     return fp;
 }
 
 FILE* abrirArquivoSaida(char *nomeArquivo) {
     FILE *fp = fopen(nomeArquivo, "w");
-
     if (fp == NULL) {
         printf("Erro ao criar o arquivo de saída: %s\n", nomeArquivo);
         return NULL;
@@ -101,7 +98,6 @@ int main() {
         fclose(arquivoEntrada);
         return EXIT_FAILURE;
     }
-
     processarEntrada(arquivoEntrada, arquivoSaida);
     fclose(arquivoEntrada);
     fclose(arquivoSaida);
