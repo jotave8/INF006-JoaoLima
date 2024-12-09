@@ -1,3 +1,10 @@
+/*
+NOME: JOÃO VICTOR OLIVEIRA DE LIMA
+MATRÍCULA: 20241160026
+DISCIPLINA: ESTRUTURA DE DADOS E ALGORITMOS (INF006)
+PROFESSOR: JOSÉ DIHEGO
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
