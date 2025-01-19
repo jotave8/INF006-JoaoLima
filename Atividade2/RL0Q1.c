@@ -79,7 +79,7 @@ int main() {
     char linha[1024];
     while (fgets(linha, sizeof(linha), entrada)) {
         char *ptr = strstr(linha, "start");
-        while (ptr && (ptr = strstr(ptr, "start"))) {
+        while (ptr && quantidadeListas < MAX_LISTAS) {
             listas[quantidadeListas].tamanho = 0;
             listas[quantidadeListas].soma = 0;
             ptr += 5;
@@ -94,7 +94,6 @@ int main() {
                 ptr++;
             }
 
-            if (quantidadeListas >= MAX_LISTAS) break;
             quantidadeListas++;
         }
     }
