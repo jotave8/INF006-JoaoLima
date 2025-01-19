@@ -62,12 +62,15 @@ FILE* abrirArquivoSaida(char *nomeArquivo) {
 
 int main() {
     FILE *entrada = abrirArquivoEntrada("L1Q1.in");
-    if (!entrada) return 1;
-
+    if (entrada == NULL) {
+        printf("Erro ao abrir o arquivo L1Q1.in\n");
+        return EXIT_FAILURE;
+    }
     FILE *saida = abrirArquivoSaida("L1Q1.out");
-    if (!saida) {
+    if (saida == NULL) {
         fclose(entrada);
-        return 1;
+        printf("Erro ao criar o arquivo L1Q1.out\n");
+        return EXIT_FAILURE;
     }
 
     Lista listas[MAX_LISTAS];
@@ -76,13 +79,14 @@ int main() {
     char linha[1024];
     while (fgets(linha, sizeof(linha), entrada)) {
         char *ptr = strstr(linha, "start");
-        while (ptr) {
+        while (ptr && (ptr = strstr(ptr, "start"))) {
             listas[quantidadeListas].tamanho = 0;
             listas[quantidadeListas].soma = 0;
             ptr += 5;
 
             int numero;
             while (sscanf(ptr, "%d", &numero) == 1) {
+                if (listas[quantidadeListas].tamanho >= MAX_NUMEROS) break;
                 listas[quantidadeListas].numeros[listas[quantidadeListas].tamanho++] = numero;
                 listas[quantidadeListas].soma += numero;
                 ptr = strchr(ptr, ' ');
@@ -90,9 +94,16 @@ int main() {
                 ptr++;
             }
 
+            if (quantidadeListas >= MAX_LISTAS) break;
             quantidadeListas++;
-            ptr = strstr(ptr, "start");
         }
+    }
+
+    if (quantidadeListas == 0) {
+        printf("Nenhuma lista encontrada no arquivo.\n");
+        fclose(entrada);
+        fclose(saida);
+        return EXIT_FAILURE;
     }
 
     for (int i = 0; i < quantidadeListas; i++) {
@@ -113,5 +124,5 @@ int main() {
     fclose(saida);
 
     printf("Arquivo de saída gerado: L1Q1.out\n");
-    return 0;
+    return EXIT_SUCCESS;
 }
