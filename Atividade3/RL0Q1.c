@@ -48,7 +48,7 @@ No* predecessor(No* raiz, int valor, No* pred) {
     } else {
         return predecessor(raiz->esq, valor, pred);
     }
-}*/
+}
 
 void liberarArvore(No* raiz) {
     if (raiz != NULL) {
