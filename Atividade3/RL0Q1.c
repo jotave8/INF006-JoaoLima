@@ -4,7 +4,7 @@
 
 typedef struct No {
     int valor;
-    int indice;  // Índice do número na entrada
+    int indice;  // Índice para diferenciar valores duplicados
     struct No *esq, *dir;
 } No;
 
@@ -21,15 +21,11 @@ int inserir(No** raiz, int valor, int indice, int altura) {
         *raiz = novoNo(valor, indice);
         return altura;
     }
-
-    // Diferenciar valores duplicados pelo índice
     if (valor < (*raiz)->valor || (valor == (*raiz)->valor && indice < (*raiz)->indice)) {
         return inserir(&((*raiz)->esq), valor, indice, altura + 1);
-    } else if (valor > (*raiz)->valor || (valor == (*raiz)->valor && indice > (*raiz)->indice)) {
+    } else {
         return inserir(&((*raiz)->dir), valor, indice, altura + 1);
     }
-
-    return altura; // Caso o valor já esteja na árvore, mantemos a altura
 }
 
 No* maximo(No* raiz) {
@@ -49,7 +45,6 @@ int alturaMaxima(No* raiz) {
 
 No* predecessor(No* raiz, int valor, int indice, No* pred) {
     if (raiz == NULL) return pred;
-    
     if (valor > raiz->valor || (valor == raiz->valor && indice > raiz->indice)) {
         return predecessor(raiz->dir, valor, indice, raiz);
     } else {
@@ -85,28 +80,19 @@ FILE* abrirArquivoSaida(char *nomeArquivo) {
 
 void processarArquivo(FILE *entrada, FILE *saida) {
     char linha[1024];
-    int valores[1000]; // Array auxiliar para armazenar os valores
-    int qtdValores;
-
     while (fgets(linha, sizeof(linha), entrada)) {
         No* raiz = NULL;
-        int numero, i = 0;
+        int numero;
         char *ptr = linha;
+        int indice = 1;  // Inicializa o índice para cada linha
 
-        qtdValores = 0;
-        
-        // Primeiro, armazenamos os valores no array
         while (sscanf(ptr, "%d", &numero) == 1) {
-            valores[qtdValores++] = numero;
+            int altura = inserir(&raiz, numero, indice, 0);
+            fprintf(saida, "%d ", altura);
             ptr = strchr(ptr, ' ');
             if (!ptr) break;
             ptr++;
-        }
-
-        // Agora, inserimos na árvore usando o índice correto
-        for (i = 0; i < qtdValores; i++) {
-            int altura = inserir(&raiz, valores[i], i, 0);
-            fprintf(saida, "%d ", altura);
+            indice++;  // Incrementa o índice para o próximo número
         }
 
         No* maxNo = maximo(raiz);
