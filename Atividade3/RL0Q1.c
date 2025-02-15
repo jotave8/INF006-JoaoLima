@@ -4,7 +4,7 @@
 
 typedef struct No {
     int valor;
-    int indice;  // Índice para diferenciar valores duplicados
+    int indice;
     struct No *esq, *dir;
 } No;
 
@@ -16,15 +16,31 @@ No* novoNo(int valor, int indice) {
     return no;
 }
 
-int inserir(No** raiz, int valor, int indice, int altura) {
+int inserir(No** raiz, int valor, int indice) {
+    No* novo = novoNo(valor, indice);
     if (*raiz == NULL) {
-        *raiz = novoNo(valor, indice);
-        return altura;
+        *raiz = novo;
+        return 0;
     }
-    if (valor < (*raiz)->valor || (valor == (*raiz)->valor && indice < (*raiz)->indice)) {
-        return inserir(&((*raiz)->esq), valor, indice, altura + 1);
-    } else {
-        return inserir(&((*raiz)->dir), valor, indice, altura + 1);
+
+    No* atual = *raiz;
+    int altura = 0;
+
+    while (1) {
+        if (valor < atual->valor || (valor == atual->valor && indice < atual->indice)) {
+            if (atual->esq == NULL) {
+                atual->esq = novo;
+                return altura + 1;
+            }
+            atual = atual->esq;
+        } else {
+            if (atual->dir == NULL) {
+                atual->dir = novo;
+                return altura + 1;
+            }
+            atual = atual->dir;
+        }
+        altura++;
     }
 }
 
@@ -37,10 +53,12 @@ No* maximo(No* raiz) {
 }
 
 int alturaMaxima(No* raiz) {
-    if (raiz == NULL) return -1;
-    int esq = alturaMaxima(raiz->esq);
-    int dir = alturaMaxima(raiz->dir);
-    return (esq > dir ? esq : dir) + 1;
+    int altura = -1;
+    while (raiz != NULL) {
+        altura++;
+        raiz = raiz->dir;
+    }
+    return altura;
 }
 
 No* predecessor(No* raiz, int valor, int indice, No* pred) {
@@ -84,15 +102,15 @@ void processarArquivo(FILE *entrada, FILE *saida) {
         No* raiz = NULL;
         int numero;
         char *ptr = linha;
-        int indice = 1;  // Inicializa o índice para cada linha
+        int indice = 1;
 
         while (sscanf(ptr, "%d", &numero) == 1) {
-            int altura = inserir(&raiz, numero, indice, 0);
+            int altura = inserir(&raiz, numero, indice);
             fprintf(saida, "%d ", altura);
             ptr = strchr(ptr, ' ');
             if (!ptr) break;
             ptr++;
-            indice++;  // Incrementa o índice para o próximo número
+            indice++;
         }
 
         No* maxNo = maximo(raiz);
@@ -108,10 +126,11 @@ void processarArquivo(FILE *entrada, FILE *saida) {
         }
 
         if (predNo != NULL) {
-            fprintf(saida, "%d\n", predNo->valor);
+            fprintf(saida, "%d", predNo->valor);
         } else {
-            fprintf(saida, "NaN\n");
+            fprintf(saida, "NaN");
         }
+        fprintf(saida, "\n");
 
         liberarArvore(raiz);
     }
