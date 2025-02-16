@@ -1,3 +1,5 @@
+//ALuno: João Victor OLiveira de Lima (20241160026)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

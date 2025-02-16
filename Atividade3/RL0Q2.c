@@ -1,3 +1,5 @@
+//ALuno: João Victor OLiveira de Lima (20241160026)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +24,7 @@ No* inserir(No* raiz, int valor){
     }
     if (valor < raiz->valor){
         raiz->esq = inserir(raiz->esq, valor);
-    }else if{ (valor > raiz->valor)
+    }else if (valor > raiz->valor){
         raiz->dir = inserir(raiz->dir, valor);
     }
     return raiz;
