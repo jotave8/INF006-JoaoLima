@@ -1,76 +1,102 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 typedef struct No {
     int valor;
-    struct No *esq, *dir;
+    int altura;
+    struct No *esquerda;
+    struct No *direita;
+    struct No *pai;
 } No;
-// Função para criar um novo nó
-No* criarNo(int valor) {
-    No* novo = (No*)malloc(sizeof(No));
-    if (novo) {
-        novo->valor = valor;
-        novo->esq = novo->dir = NULL;
+
+No* buscarNo(No *raiz, int valor) {
+    while (raiz != NULL) {
+        if (valor < raiz->valor)
+            raiz = raiz->esquerda;
+        else if (valor > raiz->valor)
+            raiz = raiz->direita;
+        else
+            return raiz;
     }
-    return novo;
+    return NULL;
 }
-// Função para inserir um valor na árvore binária de busca (sem duplicatas)
-No* inserir(No* raiz, int valor) {
-    if (raiz == NULL) return criarNo(valor);
-    if (valor < raiz->valor)
-        raiz->esq = inserir(raiz->esq, valor);
-    else if (valor > raiz->valor)
-        raiz->dir = inserir(raiz->dir, valor);
-    return raiz;
-}
-// Função para encontrar o menor nó na subárvore (para remoção)
-No* encontrarMenor(No* raiz) {
-    while (raiz->esq != NULL) raiz = raiz->esq;
-    return raiz;
-}
-// Função para remover um valor da árvore
-No* remover(No* raiz, int valor, int* sucesso) {
-    if (raiz == NULL) {
-        *sucesso = 0; // O nó não existia
-        return NULL;
+
+void inserirNo(No **raiz, int valor) {
+    No *novo = (No*) malloc(sizeof(No));
+    novo->valor = valor;
+    novo->esquerda = novo->direita = novo->pai = NULL;
+    novo->altura = 0;
+    
+    if (*raiz == NULL) {
+        *raiz = novo;
+        return;
     }
-    if (valor < raiz->valor)
-        raiz->esq = remover(raiz->esq, valor, sucesso);
-    else if (valor > raiz->valor)
-        raiz->dir = remover(raiz->dir, valor, sucesso);
-    else {
-        *sucesso = 1; // Nó encontrado e será removido
-        if (raiz->esq == NULL) {
-            No* temp = raiz->dir;
-            free(raiz);
-            return temp;
-        }
-        if (raiz->dir == NULL) {
-            No* temp = raiz->esq;
-            free(raiz);
-            return temp;
-        }
-        No* temp = encontrarMenor(raiz->dir);
-        raiz->valor = temp->valor;
-        raiz->dir = remover(raiz->dir, temp->valor, sucesso);
+
+    No *atual = *raiz, *pai = NULL;
+    int altura = 0;
+
+    while (atual != NULL) {
+        pai = atual;
+        if (valor < atual->valor)
+            atual = atual->esquerda;
+        else
+            atual = atual->direita;
+        altura++;
     }
-    return raiz;
+
+    novo->pai = pai;
+    novo->altura = altura;
+    if (valor < pai->valor)
+        pai->esquerda = novo;
+    else
+        pai->direita = novo;
 }
-// Função para calcular a altura de um nó
-int altura(No* raiz) {
-    if (raiz == NULL) return -1;
-    int altEsq = altura(raiz->esq);
-    int altDir = altura(raiz->dir);
-    return (altEsq > altDir ? altEsq : altDir) + 1;
+
+No* encontrarSucessor(No *no) {
+    No *atual = no->direita;
+    while (atual->esquerda != NULL)
+        atual = atual->esquerda;
+    return atual;
 }
-// Função para imprimir os nós em ordem com suas alturas
-void imprimirEmOrdem(No* raiz, FILE* saida) {
-    if (raiz == NULL) return;
-    imprimirEmOrdem(raiz->esq, saida);
-    fprintf(saida, "%d (%d) ", raiz->valor, altura(raiz));
-    imprimirEmOrdem(raiz->dir, saida);
+
+void removerNo(No **raiz, int valor) {
+    No *no = buscarNo(*raiz, valor);
+    if (no == NULL) return;
+    
+    if (no->esquerda == NULL && no->direita == NULL) { // Caso folha
+        if (no->pai == NULL)
+            *raiz = NULL;
+        else if (no->pai->esquerda == no)
+            no->pai->esquerda = NULL;
+        else
+            no->pai->direita = NULL;
+        free(no);
+    } else if (no->esquerda == NULL || no->direita == NULL) { // Apenas um filho
+        No *filho = (no->esquerda != NULL) ? no->esquerda : no->direita;
+        if (no->pai == NULL)
+            *raiz = filho;
+        else if (no->pai->esquerda == no)
+            no->pai->esquerda = filho;
+        else
+            no->pai->direita = filho;
+        filho->pai = no->pai;
+        free(no);
+    } else {
+        No *sucessor = encontrarSucessor(no);
+        no->valor = sucessor->valor;
+        removerNo(&(sucessor), sucessor->valor);
+    }
 }
-// Função para abrir arquivo de entrada
+
+void escreverEmOrdem(No *raiz, FILE *fp) {
+    if (raiz) {
+        escreverEmOrdem(raiz->esquerda, fp);
+        fprintf(fp, "%d (%d) ", raiz->valor, raiz->altura);
+        escreverEmOrdem(raiz->direita, fp);
+    }
+}
+
 FILE* abrirArquivoEntrada(char *nomeArquivo) {
     FILE *fp = fopen(nomeArquivo, "r");
     if (fp == NULL) {
@@ -79,7 +105,7 @@ FILE* abrirArquivoEntrada(char *nomeArquivo) {
     }
     return fp;
 }
-// Função para abrir arquivo de saída
+
 FILE* abrirArquivoSaida(char *nomeArquivo) {
     FILE *fp = fopen(nomeArquivo, "w");
     if (fp == NULL) {
@@ -88,44 +114,34 @@ FILE* abrirArquivoSaida(char *nomeArquivo) {
     }
     return fp;
 }
-// Função principal
+
 int main() {
     FILE *entrada = abrirArquivoEntrada("L2Q3.in");
-    if (entrada == NULL) return EXIT_FAILURE;
     FILE *saida = abrirArquivoSaida("L2Q3.out");
-    if (saida == NULL) {
-        fclose(entrada);
-        return EXIT_FAILURE;
-    }
-    No* raiz = NULL;
-    char operacao;
-    int valor;
-    char linha[1024];
-    // Lendo cada linha do arquivo
+    char linha[1000];
+
+    if (!entrada || !saida) return EXIT_FAILURE;
+
     while (fgets(linha, sizeof(linha), entrada)) {
-        char *ptr = linha;
-        while (sscanf(ptr, " %c %d", &operacao, &valor) == 2) {
-            if (operacao == 'a') {
-                raiz = inserir(raiz, valor);
-            } else if (operacao == 'r') {
-                int sucesso = 0;
-                raiz = remover(raiz, valor, &sucesso);
-                if (!sucesso) raiz = inserir(raiz, valor); // Se não existia, adiciona
+        No *raiz = NULL;
+        char *token = strtok(linha, " ");
+        
+        while (token) {
+            if (token[0] == 'a') {
+                token = strtok(NULL, " ");
+                inserirNo(&raiz, atoi(token));
+            } else if (token[0] == 'r') {
+                token = strtok(NULL, " ");
+                removerNo(&raiz, atoi(token));
             }
-            ptr = strchr(ptr, ' ');
-            if (!ptr) break;
-            ptr++;
+            token = strtok(NULL, " ");
         }
-        if (raiz != NULL) {
-            imprimirEmOrdem(raiz, saida);
-            fprintf(saida, "\n");
-        }
-        // Liberar a árvore para a próxima linha
-        free(raiz);
-        raiz = NULL;
+        
+        escreverEmOrdem(raiz, saida);
+        fprintf(saida, "\n");
     }
+
     fclose(entrada);
     fclose(saida);
-    printf("Arquivo de saída gerado: L2Q3.out\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
