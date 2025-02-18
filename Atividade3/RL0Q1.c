@@ -133,7 +133,6 @@ void processarArquivo(FILE *entrada, FILE *saida) {
             fprintf(saida, "NaN");
         }
         fprintf(saida, "\n");
-
         liberarArvore(raiz);
     }
 }
@@ -143,7 +142,6 @@ int main() {
     FILE *saida = abrirArquivoSaida("L2Q1.out");
 
     processarArquivo(entrada, saida);
-
     fclose(entrada);
     fclose(saida);
 
