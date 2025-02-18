@@ -35,7 +35,6 @@ void inserirNo(No **raiz, int valor) {
 
     No *atual = *raiz, *pai = NULL;
     int altura = 0;
-
     while (atual != NULL) {
         pai = atual;
         if (valor < atual->valor)
@@ -64,7 +63,7 @@ void removerNo(No **raiz, int valor) {
     No *no = buscarNo(*raiz, valor);
     if (no == NULL) return;
     
-    if (no->esquerda == NULL && no->direita == NULL) { // Caso folha
+    if (no->esquerda == NULL && no->direita == NULL) {
         if (no->pai == NULL)
             *raiz = NULL;
         else if (no->pai->esquerda == no)
@@ -72,7 +71,7 @@ void removerNo(No **raiz, int valor) {
         else
             no->pai->direita = NULL;
         free(no);
-    } else if (no->esquerda == NULL || no->direita == NULL) { // Apenas um filho
+    } else if (no->esquerda == NULL || no->direita == NULL) {
         No *filho = (no->esquerda != NULL) ? no->esquerda : no->direita;
         if (no->pai == NULL)
             *raiz = filho;
@@ -132,15 +131,18 @@ int main() {
                 inserirNo(&raiz, atoi(token));
             } else if (token[0] == 'r') {
                 token = strtok(NULL, " ");
-                removerNo(&raiz, atoi(token));
+                int valor = atoi(token);
+                if (buscarNo(raiz, valor) == NULL) {
+                    inserirNo(&raiz, valor);
+                } else {
+                    removerNo(&raiz, valor);
+                }
             }
             token = strtok(NULL, " ");
         }
-        
         escreverEmOrdem(raiz, saida);
         fprintf(saida, "\n");
     }
-
     fclose(entrada);
     fclose(saida);
     return 0;
