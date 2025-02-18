@@ -39,10 +39,8 @@ int somaNos(No* raiz){
 }
 
 void imprimirBalanceamento(No* raiz, FILE* saida){
-    if (raiz == NULL){
+    if (raiz == NULL)
         return;
-    }
-
     imprimirBalanceamento(raiz->esq, saida);
     int somaDir = somaNos(raiz->dir);
     int somaEsq = somaNos(raiz->esq);
@@ -84,7 +82,6 @@ int main() {
     while (fgets(linha, sizeof(linha), entrada)) {
         int valor;
         char *ptr = linha;
-
         while (sscanf(ptr, "%d", &valor) == 1) {
             raiz = inserir(raiz, valor);
             ptr = strchr(ptr, ' ');
