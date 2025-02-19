@@ -1,3 +1,5 @@
+//João Victor Oliveira de Lima (20241160026)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +12,7 @@ typedef struct No {
     struct No *pai;
 } No;
 
-No* buscarNo(No *raiz, int valor) {
+No* buscar(No *raiz, int valor) {
     while (raiz != NULL) {
         if (valor < raiz->valor)
             raiz = raiz->esquerda;
@@ -22,7 +24,7 @@ No* buscarNo(No *raiz, int valor) {
     return NULL;
 }
 
-void inserirNo(No **raiz, int valor) {
+void inserir(No **raiz, int valor) {
     No *novo = (No*) malloc(sizeof(No));
     novo->valor = valor;
     novo->esquerda = novo->direita = novo->pai = NULL;
@@ -43,7 +45,6 @@ void inserirNo(No **raiz, int valor) {
             atual = atual->direita;
         altura++;
     }
-
     novo->pai = pai;
     novo->altura = altura;
     if (valor < pai->valor)
@@ -52,15 +53,15 @@ void inserirNo(No **raiz, int valor) {
         pai->direita = novo;
 }
 
-No* encontrarSucessor(No *no) {
+No* Sucessor(No *no) {
     No *atual = no->direita;
     while (atual->esquerda != NULL)
         atual = atual->esquerda;
     return atual;
 }
 
-void removerNo(No **raiz, int valor) {
-    No *no = buscarNo(*raiz, valor);
+void remover(No **raiz, int valor) {
+    No *no = buscar(*raiz, valor);
     if (no == NULL) return;
     
     if (no->esquerda == NULL && no->direita == NULL) {
@@ -82,17 +83,17 @@ void removerNo(No **raiz, int valor) {
         filho->pai = no->pai;
         free(no);
     } else {
-        No *sucessor = encontrarSucessor(no);
+        No *sucessor = Sucessor(no);
         no->valor = sucessor->valor;
-        removerNo(&(sucessor), sucessor->valor);
+        remover(&(sucessor), sucessor->valor);
     }
 }
 
-void escreverEmOrdem(No *raiz, FILE *fp) {
+void emOrdem(No *raiz, FILE *fp) {
     if (raiz) {
-        escreverEmOrdem(raiz->esquerda, fp);
+        emOrdem(raiz->esquerda, fp);
         fprintf(fp, "%d (%d) ", raiz->valor, raiz->altura);
-        escreverEmOrdem(raiz->direita, fp);
+        emOrdem(raiz->direita, fp);
     }
 }
 
@@ -128,22 +129,23 @@ int main() {
         while (token) {
             if (token[0] == 'a') {
                 token = strtok(NULL, " ");
-                inserirNo(&raiz, atoi(token));
+                inserir(&raiz, atoi(token));
             } else if (token[0] == 'r') {
                 token = strtok(NULL, " ");
                 int valor = atoi(token);
-                if (buscarNo(raiz, valor) == NULL) {
-                    inserirNo(&raiz, valor);
+                if (buscar(raiz, valor) == NULL) {
+                    inserir(&raiz, valor);
                 } else {
-                    removerNo(&raiz, valor);
+                    remover(&raiz, valor);
                 }
             }
             token = strtok(NULL, " ");
         }
-        escreverEmOrdem(raiz, saida);
+        emOrdem(raiz, saida);
         fprintf(saida, "\n");
     }
     fclose(entrada);
     fclose(saida);
+    printf("Arquivo de saída gerado: L2Q3.out\n");
     return 0;
-}
+} 
